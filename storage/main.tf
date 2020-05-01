@@ -46,7 +46,7 @@ resource "aws_s3_bucket" "private_bucket" {
   policy = data.aws_iam_policy_document.enforce_tls.json
 
   versioning {
-    enabled = true
+    enabled = false
   }
 
   lifecycle_rule {

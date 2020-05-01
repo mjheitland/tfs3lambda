@@ -10,7 +10,7 @@ data "aws_region" "current" {}
 data "aws_caller_identity" "current" {}
 
 locals {
-  bucket = "tfs3polling-${data.aws_caller_identity.current.account_id}-${data.aws_region.current.name}"
+  bucket = "tfs3lambda-${data.aws_caller_identity.current.account_id}-${data.aws_region.current.name}"
 }
 
 # deploy storage resources
