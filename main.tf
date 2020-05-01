@@ -18,6 +18,11 @@ module "storage" {
   source = "./storage"
   
   bucket = local.bucket
+  
+  enable_bucket_inventory = false
+  enable_lifecycle        = false
+  force_destroy           = true
+
   tags = {
     "project-name": var.project_name
   }

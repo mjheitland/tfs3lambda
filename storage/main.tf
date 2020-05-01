@@ -44,13 +44,14 @@ resource "aws_s3_bucket" "private_bucket" {
   acl    = "private"
   tags   = var.tags
   policy = data.aws_iam_policy_document.enforce_tls.json
+  force_destroy = var.force_destroy
 
   versioning {
-    enabled = false
+    enabled = var.enable_versioning
   }
 
   lifecycle_rule {
-    enabled = true
+    enabled = var.enable_lifecycle
 
     abort_incomplete_multipart_upload_days = 14
 

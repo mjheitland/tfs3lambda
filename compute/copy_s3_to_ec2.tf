@@ -14,15 +14,24 @@ data "archive_file" "copy_s3_to_ec2" {
 
 
 #-------------------
+# Locals
+#-------------------
+locals {
+  region  = data.aws_region.current.name
+  account = data.aws_caller_identity.current.account_id
+}
+
+#-------------------
 # Roles and Policies
 #-------------------
 
 resource "aws_lambda_permission" "s3_invoke_lambda_permission" {
-  statement_id  = "allow_s3_to_invoke_lambda"
-  action        = "lambda:InvokeFunction"
-  function_name = aws_lambda_function.copy_s3_to_ec2.arn
-  principal     = "s3.amazonaws.com"
-  source_arn    = var.bucket_arn
+  statement_id    = "allow_s3_to_invoke_lambda"
+  action          = "lambda:InvokeFunction"
+  function_name   = aws_lambda_function.copy_s3_to_ec2.arn
+  principal       = "s3.amazonaws.com"
+  source_arn      = var.bucket_arn
+  source_account  = local.account
 }
 
 resource "aws_iam_role" "copy_s3_to_ec2" {
@@ -73,7 +82,7 @@ resource "aws_iam_role_policy" "lambda_logging" {
         {
             "Effect": "Allow",
             "Action": "logs:CreateLogGroup",
-            "Resource": "arn:aws:logs:${data.aws_region.current.name}:${data.aws_caller_identity.current.account_id}:*"
+            "Resource": "arn:aws:logs:${local.region}:${local.account}:*"
         },
         {
             "Effect": "Allow",
@@ -82,7 +91,7 @@ resource "aws_iam_role_policy" "lambda_logging" {
                 "logs:PutLogEvents"
             ],
             "Resource": [
-                "arn:aws:logs:${data.aws_region.current.name}:${data.aws_caller_identity.current.account_id}:log-group:/aws/lambda/copy_s3_to_ec2:*"
+                "arn:aws:logs:${local.region}:${local.account}:log-group:/aws/lambda/copy_s3_to_ec2:*"
             ]
         }
     ]
@@ -105,7 +114,8 @@ resource "aws_lambda_function" "copy_s3_to_ec2" {
   source_code_hash  = data.archive_file.copy_s3_to_ec2.output_base64sha256
   environment {
     variables = {
-      "MyRegion" = data.aws_region.current.name
+      "MyRegion"    = local.region 
+      "MyAccountId" = local.account
     }
   }
 }
