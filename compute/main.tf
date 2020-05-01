@@ -8,7 +8,7 @@ resource "aws_key_pair" "keypair" {
 
 #--- data sources
 
-data "aws_ami" "amazon-linux-2" {
+data "aws_ami" "amazon_linux_2" {
   most_recent = true
   owners = ["amazon"]
 
@@ -97,7 +97,7 @@ resource "aws_iam_instance_profile" "consumer_profile" {
 
 resource "aws_instance" "consumer" {
   instance_type           = "t3.micro"
-  ami                     = data.aws_ami.amazon-linux-2.id
+  ami                     = data.aws_ami.amazon_linux_2.id
   key_name                = aws_key_pair.keypair.id
   subnet_id               = var.subpub1_id
   vpc_security_group_ids  = [var.sgpub1_id]
@@ -182,7 +182,7 @@ resource "aws_iam_instance_profile" "provider_profile" {
 
 resource "aws_instance" "provider" {
   instance_type           = "t3.micro"
-  ami                     = data.aws_ami.amazon-linux-2.id
+  ami                     = data.aws_ami.amazon_linux_2.id
   key_name                = aws_key_pair.keypair.id
   subnet_id               = var.subpub1_id
   vpc_security_group_ids  = [var.sgpub1_id]

@@ -27,3 +27,7 @@ variable "bucket" {
   description = "name of the bucket that stores the files"
   type        = string
 }
+variable "bucket_arn" {
+  description = "arn of the bucket that stores the files"
+  type        = string
+}

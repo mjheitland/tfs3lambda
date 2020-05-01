@@ -43,4 +43,5 @@ module "compute" {
   sgpub1_id       = module.networking.sgpub1_id
 
   bucket          = local.bucket
+  bucket_arn      = module.storage.arn
 }
