@@ -1,4 +1,4 @@
-# Copying files between two EC2 instances using S3 and Lambda (triggered by S3 events)
+# Copying files between two EC2 instances using S3 and Lambda (triggered by S3 events) with SSM
 
 The following components get created:
 + 1 S3 bucket
@@ -29,3 +29,6 @@ The following components get created:
     rm -rfv **/.terraform # remove all recursive subdirectories
     
 <br>
+
+## Link: 
+<a href="https://cloudbriefly.com/post/running-ssm-agent-in-an-aws-lambda-function/">Running SSM Agent in an AWS Lambda Function</a>
