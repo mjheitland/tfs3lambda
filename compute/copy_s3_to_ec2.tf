@@ -35,7 +35,13 @@ resource "aws_lambda_permission" "s3_invoke_lambda_permission" {
 }
 
 resource "aws_iam_role" "copy_s3_to_ec2" {
-    name               = "copy_s3_to_ec2"
+    name               = format("%s_copy_s3_to_ec2", var.project_name)
+
+    tags = { 
+      Name = format("%s_copy_s3_to_ec2", var.project_name)
+      project_name = var.project_name
+    }
+
     assume_role_policy = <<POLICY
 {
   "Version": "2012-10-17",
@@ -112,11 +118,17 @@ resource "aws_lambda_function" "copy_s3_to_ec2" {
   runtime           = "python3.7"
   description       = "A function to copy files from S3 to ec2."
   source_code_hash  = data.archive_file.copy_s3_to_ec2.output_base64sha256
+
   environment {
     variables = {
       "MyRegion"    = local.region 
       "MyAccountId" = local.account
     }
+  }
+
+  tags = { 
+    Name = format("%s_copy_s3_to_ec2", var.project_name)
+    project_name = var.project_name
   }
 }
 
@@ -133,5 +145,6 @@ resource "aws_s3_bucket_notification" "bucket_notification" {
     filter_prefix       = "mydata/"
     filter_suffix       = ""
   }
+
   depends_on = [aws_lambda_permission.s3_invoke_lambda_permission]
 }

@@ -23,8 +23,9 @@ module "storage" {
   enable_lifecycle        = false
   force_destroy           = true
 
-  tags = {
-    "project-name": var.project_name
+  tags = { 
+    Name = format("%s_%s", var.project_name, local.bucket)
+    project_name = var.project_name
   }
 }
 
