@@ -108,8 +108,10 @@ resource "aws_s3_bucket_public_access_block" "public_access_block" {
   # Block new public bucket policies
   block_public_policy = true
 
-  # Retroactivley block public and cross-account access if bucket has public policies
+  # Retroactively block public and cross-account access if bucket has public policies
   restrict_public_buckets = true
+
+  depends_on = [aws_s3_bucket.private_bucket]
 }
 
 resource "aws_s3_bucket_inventory" "inventory" {
