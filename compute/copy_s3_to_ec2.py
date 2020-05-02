@@ -1,3 +1,5 @@
+# copy_s3_to_ec2.py: logging S3 create events to Cloudwatch
+
 import json
 import urllib.parse
 import boto3

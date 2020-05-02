@@ -1,4 +1,5 @@
 #--- compute/outputs.tf
+
 output "keypair_id" {
   value = "${join(", ", aws_key_pair.keypair.*.id)}"
 }

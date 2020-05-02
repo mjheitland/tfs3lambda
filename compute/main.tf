@@ -42,6 +42,7 @@ data "aws_ami" "amazon_linux_2" {
 data "template_file" "userdata_consumer" {
   template = file("${path.module}/userdata_consumer.tpl")
   vars = {
+    region = var.region
     server_name = "consumer"
     bucket = var.bucket
   }
@@ -156,9 +157,12 @@ resource "aws_instance" "consumer" {
 data "template_file" "userdata_provider" {
   template = file("${path.module}/userdata_provider.tpl")
   vars = {
+    region = var.region
     server_name = "provider"
     bucket = var.bucket
+    consumer_id = (aws_instance.consumer.*.id)[0]
   }
+  depends_on = [aws_lambda_permission.s3_invoke_lambda_permission, aws_instance.consumer]
 }
 
 resource "aws_iam_role" "provider_role" {
@@ -174,6 +178,12 @@ resource "aws_iam_role" "provider_role" {
       },
       "Action": "sts:AssumeRole",
       "Effect": "Allow"
+    },
+    {
+      "Sid": "providerAssumeSSMRolePolicy",
+      "Action": "sts:AssumeRole",
+      "Effect": "Allow",
+      "Principal": {"Service": "ssm.amazonaws.com"}
     }
   ]
 }
@@ -245,5 +255,7 @@ resource "aws_instance" "provider" {
     Name = format("%s_provider", var.project_name)
     project_name = var.project_name
   }
+
+  depends_on = [aws_instance.consumer]
 }
 

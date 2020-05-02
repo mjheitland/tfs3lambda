@@ -1,3 +1,5 @@
+#--- compute/copy_s3_to_ec2.tf
+
 #---------------
 # Data Providers
 #---------------

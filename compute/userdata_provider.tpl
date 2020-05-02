@@ -29,6 +29,7 @@ echo "
 set -euo pipefail
 echo \"Hello World! \" > \"$datadir/\$(date +\"%Y-%m-%d_%T.txt\")\"
 aws s3 cp --recursive $datadir/ s3://${bucket}/mydata/
+aws ssm send-command --region=$region --instance-ids ${consumer_id} --document-name \"AWS-RunShellScript\" --comment \"run shell script on ec2\" --parameters '{\"commands\":[\"# !/usr/bin/bash\",\"source /var/myscripts/copy-file.sh\"]}'
 rm -rf $datadir/*
 " >> $scriptdir/$scriptfile
 chmod +x $scriptdir/$scriptfile
@@ -39,6 +40,8 @@ echo "*/1 * * * * /var/myscripts/generate-file.sh" >> $cronpath
 
 # start http server listing all files in <datadir>
 # for Python 3: sudo nohup python -m http.server 80 &
+echo "Region: ${region}" >> $logdir/$logfile
+echo "Consumer id:  ${consumer_id}" >> $logdir/$logfile
 echo "Server name: ${server_name}" >> $logdir/$logfile
 aws --version >> $logdir/$logfile
 yum info amazon-ssm-agent >> $logdir/$logfile

@@ -37,6 +37,7 @@ chmod +x $scriptdir/$scriptfile
 
 # start http server listing all files in <datadir>
 # for Python 3: sudo nohup python -m http.server 80 &
+echo "Region: ${region}" >> $logdir/$logfile
 echo "Server name: ${server_name}" >> $logdir/$logfile
 aws --version >> $logdir/$logfile
 yum info amazon-ssm-agent >> $logdir/$logfile
