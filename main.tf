@@ -27,6 +27,7 @@ module "storage" {
   enable_bucket_inventory = false
   enable_lifecycle        = false
   force_destroy           = true
+  enable_versioning       = false
 
   tags = { 
     Name = format("%s_%s", var.project_name, local.bucket)
