@@ -31,4 +31,4 @@ The following components get created:
 <br>
 
 ## Link: 
-<a href="https://cloudbriefly.com/post/running-ssm-agent-in-an-aws-lambda-function/">Running SSM Agent in an AWS Lambda Function</a>
+<a href="https://docs.aws.amazon.com/systems-manager/latest/userguide/walkthrough-cli.html#walkthrough-cli-examples">SSM Run Command</a>

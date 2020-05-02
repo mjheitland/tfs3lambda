@@ -3,6 +3,11 @@
 # update packages - run it only on ec2 in public subnets as it requires internet connectivity
 # yum update -y
 
+# create script directory
+scriptdir=/var/myscripts
+scriptfile=copy-file.sh
+mkdir -p $scriptdir
+
 # create data directory
 datadir=/var/mydata
 mkdir -p $datadir
@@ -13,6 +18,22 @@ logdir=/var/mylogs
 logfile=log.txt
 mkdir -p $logdir
 chown -R ec2-user $logdir
+
+# shell command to sync ec2's data directory with S3 directory (S3 => local folder on ec2)
+# space needed after ! to prevent bash history substitution
+# shebang may contain space before command
+# ${bucket} is replaced by terraform, $datadir is ignored and replaced by bash at runtime
+# terraform gives an error if there are unknown variables in curly brackets
+echo "
+#! /bin/bash
+set -euo pipefail
+aws s3 sync --delete s3://${bucket}/mydata/ $datadir/
+" >> $scriptdir/$scriptfile
+chmod +x $scriptdir/$scriptfile
+
+# add cron task to sync ec2's data directory with S3 directory, runs every minute under 'ec2-user' account
+# cronpath=/var/spool/cron/ec2-user
+# echo "*/1 * * * * /var/myscripts/copy-file.sh" >> $cronpath
 
 # start http server listing all files in <datadir>
 # for Python 3: sudo nohup python -m http.server 80 &

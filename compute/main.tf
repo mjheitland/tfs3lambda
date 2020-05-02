@@ -1,12 +1,18 @@
 #--- compute/main.tf
 
-#--- key pair
+#------------
+#--- Key Pair
+#------------
+
 resource "aws_key_pair" "keypair" {
   key_name   = var.key_name
   public_key = file(var.public_key_path)
 }
 
-#--- data sources
+
+#----------------
+#--- Data Sources
+#----------------
 
 data "aws_ami" "amazon_linux_2" {
   most_recent = true
@@ -29,7 +35,10 @@ data "aws_ami" "amazon_linux_2" {
 }  
 
 
+#------------
 #--- Consumer
+#------------
+
 data "template_file" "userdata_consumer" {
   template = file("${path.module}/userdata_consumer.tpl")
   vars = {
@@ -46,12 +55,16 @@ resource "aws_iam_role" "consumer_role" {
   "Statement": [
     {
       "Sid": "consumerAssumeEC2RolePolicy",
-      "Principal": {
-        "Service": "ec2.amazonaws.com"
-      },
       "Action": "sts:AssumeRole",
-      "Effect": "Allow"
-    }
+      "Effect": "Allow",
+      "Principal": { "Service": "ec2.amazonaws.com" }
+    },
+    {
+      "Sid": "consumerAssumeSSMRolePolicy",
+      "Action": "sts:AssumeRole",
+      "Effect": "Allow",
+      "Principal": {"Service": "ssm.amazonaws.com"}
+    } 
   ]
 }
 EOF
@@ -85,9 +98,35 @@ resource "aws_iam_role_policy" "consumer_policy" {
       ],
       "Effect":"Allow",
       "Resource":"arn:aws:s3:::${var.bucket}/*"
-    }
+    },
+    {
+            "Sid": "SSMRead",
+            "Effect": "Allow",
+            "Action": [
+                "ssm:GetAutomationExecution",
+                "ssm:GetParameters",
+                "ssm:ListCommands",
+                "ssm:StartAutomationExecution"
+            ],
+            "Resource": [
+                "*"
+            ]
+        }
   ]}
 EOF
+}
+
+resource "aws_iam_role_policy_attachment" "ssm_attachment" {
+  role       = aws_iam_role.consumer_role.name
+  policy_arn = "arn:aws:iam::aws:policy/AmazonSSMManagedInstanceCore"
+}
+
+resource "aws_ssm_activation" "ssm_activation" {
+  name               = "ssm_activation"
+  description        = "Activate SSM"
+  iam_role           = aws_iam_role.consumer_role.id
+  registration_limit = "5"
+  depends_on         = [aws_iam_role_policy_attachment.ssm_attachment]
 }
 
 resource "aws_iam_instance_profile" "consumer_profile" {
@@ -110,7 +149,9 @@ resource "aws_instance" "consumer" {
 }
 
 
-#--- provider
+#------------
+#--- Provider
+#------------
 
 data "template_file" "userdata_provider" {
   template = file("${path.module}/userdata_provider.tpl")
@@ -170,6 +211,18 @@ resource "aws_iam_role_policy" "provider_policy" {
       ],
       "Effect":"Allow",
       "Resource":"arn:aws:s3:::${var.bucket}/*"
+    },
+    {
+        "Sid": "SSMWrite",
+        "Effect": "Allow",
+        "Action": [ 
+            "ssm:SendCommand"
+        ],
+        "Resource": [
+            "arn:aws:ec2:${var.region}:*:instance/${aws_instance.consumer.*.id[0]}",
+            "arn:aws:s3:::${var.bucket}",
+            "arn:aws:ssm:${var.region}:*:document/AWS-ApplyPatchBaseline"
+        ]
     }
   ]}
 EOF
@@ -193,3 +246,4 @@ resource "aws_instance" "provider" {
     project_name = var.project_name
   }
 }
+

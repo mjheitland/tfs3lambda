@@ -4,8 +4,6 @@
 
 data "aws_caller_identity" "current" {}
 
-data "aws_region" "current" {}
-
 data "archive_file" "copy_s3_to_ec2" {
   type        = "zip"
   source_file = "./compute/copy_s3_to_ec2.py"
@@ -17,7 +15,6 @@ data "archive_file" "copy_s3_to_ec2" {
 # Locals
 #-------------------
 locals {
-  region  = data.aws_region.current.name
   account = data.aws_caller_identity.current.account_id
 }
 
@@ -88,7 +85,7 @@ resource "aws_iam_role_policy" "lambda_logging" {
         {
             "Effect": "Allow",
             "Action": "logs:CreateLogGroup",
-            "Resource": "arn:aws:logs:${local.region}:${local.account}:*"
+            "Resource": "arn:aws:logs:${var.region}:${local.account}:*"
         },
         {
             "Effect": "Allow",
@@ -97,7 +94,7 @@ resource "aws_iam_role_policy" "lambda_logging" {
                 "logs:PutLogEvents"
             ],
             "Resource": [
-                "arn:aws:logs:${local.region}:${local.account}:log-group:/aws/lambda/copy_s3_to_ec2:*"
+                "arn:aws:logs:${var.region}:${local.account}:log-group:/aws/lambda/copy_s3_to_ec2:*"
             ]
         }
     ]
@@ -121,7 +118,7 @@ resource "aws_lambda_function" "copy_s3_to_ec2" {
 
   environment {
     variables = {
-      "MyRegion"    = local.region 
+      "MyRegion"    = var.region 
       "MyAccountId" = local.account
     }
   }
