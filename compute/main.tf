@@ -75,6 +75,19 @@ EOF
   }
 }
 
+resource "aws_iam_role_policy_attachment" "consumer_ssm_attachment" {
+  role       = aws_iam_role.consumer_role.name
+  policy_arn = "arn:aws:iam::aws:policy/AmazonSSMManagedInstanceCore"
+}
+
+resource "aws_ssm_activation" "consumer_ssm_activation" {
+  name               = "consumer_ssm_activation"
+  description        = "Activate SSM"
+  iam_role           = aws_iam_role.consumer_role.id
+  registration_limit = "5"
+  depends_on         = [aws_iam_role_policy_attachment.consumer_ssm_attachment]
+}
+
 resource "aws_iam_role_policy" "consumer_policy" {
   name = "consumer_policy"
   role = aws_iam_role.consumer_role.id
@@ -104,6 +117,7 @@ resource "aws_iam_role_policy" "consumer_policy" {
             "Sid": "SSMRead",
             "Effect": "Allow",
             "Action": [
+                "ssm:*",
                 "ssm:GetAutomationExecution",
                 "ssm:GetParameters",
                 "ssm:ListCommands",
@@ -115,19 +129,6 @@ resource "aws_iam_role_policy" "consumer_policy" {
         }
   ]}
 EOF
-}
-
-resource "aws_iam_role_policy_attachment" "consumer_ssm_attachment" {
-  role       = aws_iam_role.consumer_role.name
-  policy_arn = "arn:aws:iam::aws:policy/AmazonSSMManagedInstanceCore"
-}
-
-resource "aws_ssm_activation" "consumer_ssm_activation" {
-  name               = "consumer_ssm_activation"
-  description        = "Activate SSM"
-  iam_role           = aws_iam_role.consumer_role.id
-  registration_limit = "5"
-  depends_on         = [aws_iam_role_policy_attachment.consumer_ssm_attachment]
 }
 
 resource "aws_iam_instance_profile" "consumer_profile" {
@@ -196,7 +197,7 @@ EOF
 
 resource "aws_iam_role_policy_attachment" "provider_ssm_attachment" {
   role       = aws_iam_role.provider_role.name
-  policy_arn = "arn:aws:iam::aws:policy/service-role/AmazonEC2RoleforSSM"
+  policy_arn = "arn:aws:iam::aws:policy/AmazonSSMManagedInstanceCore"
 }
 
 resource "aws_ssm_activation" "provider_ssm_activation" {
@@ -239,6 +240,7 @@ resource "aws_iam_role_policy" "provider_policy" {
         "Sid": "SSMWrite",
         "Effect": "Allow",
         "Action": [ 
+            "ssm:*",
             "ssm:SendCommand"
         ],
         "Resource": [
