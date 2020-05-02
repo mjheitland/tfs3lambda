@@ -11,13 +11,11 @@ mkdir -p $scriptdir
 # create data directory
 datadir=/var/mydata
 mkdir -p $datadir
-chown -R ec2-user $datadir
 
 # create log directory
 logdir=/var/mylogs
 logfile=log.txt
 mkdir -p $logdir
-chown -R ec2-user $logdir
 
 # shell command to sync ec2's data directory with S3 directory (S3 => local folder on ec2)
 # space needed after ! to prevent bash history substitution
@@ -43,3 +41,8 @@ yum info amazon-ssm-agent >> $logdir/$logfile
 echo "Starting SimpleHTTPServer ..." >> $logdir/$logfile
 nohup python -m SimpleHTTPServer 80 &
 echo "... SimpleHTTPServer is running" >> $logdir/$logfile
+
+# change ownership to ec2-user
+chown -R ec2-user $scriptdir
+chown -R ec2-user $datadir
+chown -R ec2-user $logdir
