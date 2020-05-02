@@ -117,17 +117,17 @@ resource "aws_iam_role_policy" "consumer_policy" {
 EOF
 }
 
-resource "aws_iam_role_policy_attachment" "ssm_attachment" {
+resource "aws_iam_role_policy_attachment" "consumer_ssm_attachment" {
   role       = aws_iam_role.consumer_role.name
   policy_arn = "arn:aws:iam::aws:policy/AmazonSSMManagedInstanceCore"
 }
 
-resource "aws_ssm_activation" "ssm_activation" {
-  name               = "ssm_activation"
+resource "aws_ssm_activation" "consumer_ssm_activation" {
+  name               = "consumer_ssm_activation"
   description        = "Activate SSM"
   iam_role           = aws_iam_role.consumer_role.id
   registration_limit = "5"
-  depends_on         = [aws_iam_role_policy_attachment.ssm_attachment]
+  depends_on         = [aws_iam_role_policy_attachment.consumer_ssm_attachment]
 }
 
 resource "aws_iam_instance_profile" "consumer_profile" {
@@ -192,6 +192,19 @@ EOF
       Name = format("%s_provider_role", var.project_name)
       project_name = var.project_name
   }
+}
+
+resource "aws_iam_role_policy_attachment" "provider_ssm_attachment" {
+  role       = aws_iam_role.provider_role.name
+  policy_arn = "arn:aws:iam::aws:policy/service-role/AmazonEC2RoleforSSM"
+}
+
+resource "aws_ssm_activation" "provider_ssm_activation" {
+  name               = "provider_ssm_attachment"
+  description        = "Activate SSM"
+  iam_role           = aws_iam_role.provider_role.id
+  registration_limit = "5"
+  depends_on         = [aws_iam_role_policy_attachment.provider_ssm_attachment]
 }
 
 resource "aws_iam_role_policy" "provider_policy" {

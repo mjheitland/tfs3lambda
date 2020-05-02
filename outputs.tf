@@ -50,8 +50,8 @@ output "provider_ids" {
 output "provider_public_ips" {
   value = module.compute.provider_public_ips
 }
-output "consumer_ids" {
-  value = module.compute.consumer_ids
+output "consumer_id" {
+  value = module.compute.consumer_id
 }
 output "consumer_public_ips" {
   value = module.compute.consumer_public_ips
