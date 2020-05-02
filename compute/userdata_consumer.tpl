@@ -24,8 +24,7 @@ chown -R ec2-user $logdir
 # shebang may contain space before command
 # ${bucket} is replaced by terraform, $datadir is ignored and replaced by bash at runtime
 # terraform gives an error if there are unknown variables in curly brackets
-echo "
-#! /bin/bash
+echo "#! /bin/bash
 set -euo pipefail
 aws s3 sync --delete s3://${bucket}/mydata/ $datadir/
 " >> $scriptdir/$scriptfile

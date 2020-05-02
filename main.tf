@@ -1,16 +1,21 @@
 #--- root/main.tf ---
+
+#------------
+#--- Provider
+#------------
 provider "aws" {
   region = "eu-west-1"
 }
 
-# region
-data "aws_region" "current" {}
-
 # account information
 data "aws_caller_identity" "current" {}
 
+#----------
+#--- Locals
+#----------
 locals {
-  bucket = "tfs3lambda-${data.aws_caller_identity.current.account_id}-${data.aws_region.current.name}"
+  account_id = data.aws_caller_identity.current.account_id
+  bucket = "tfs3lambda-${data.aws_caller_identity.current.account_id}-${var.region}"
 }
 
 # deploy storage resources
@@ -40,6 +45,7 @@ module "networking" {
 module "compute" {
   source          = "./compute"
   
+  account_id      = local.account_id
   region          = var.region
   project_name    = var.project_name
   key_name        = var.key_name

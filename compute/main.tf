@@ -229,9 +229,11 @@ resource "aws_iam_role_policy" "provider_policy" {
             "ssm:SendCommand"
         ],
         "Resource": [
-            "arn:aws:ec2:${var.region}:*:instance/${aws_instance.consumer.*.id[0]}",
             "arn:aws:s3:::${var.bucket}",
-            "arn:aws:ssm:${var.region}:*:document/AWS-ApplyPatchBaseline"
+            "arn:aws:ec2:${var.region}:${var.account_id}:instance/${aws_instance.consumer.*.id[0]}",
+            "arn:aws:ssm:${var.region}:${var.account_id}:document/AWS-ApplyPatchBaseline",
+            "arn:aws:ssm:${var.region}:${var.account_id}:document/AWS-RunShellScript",            
+            "arn:aws:ssm:${var.region}:${var.account_id}:document/RestartServices"            
         ]
     }
   ]}

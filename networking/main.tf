@@ -1,10 +1,14 @@
 #-- networking/main.tf ---
 
-data "aws_region" "current" {}
-
+#-----------------
+#--- Data Provider
+#-----------------
 data "aws_availability_zones" "available" {}
 
+
+#---------
 #--- VPC 1
+#---------
 
 resource "aws_vpc" "vpc1" {
   cidr_block           = "10.1.0.0/16"

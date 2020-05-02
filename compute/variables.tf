@@ -1,5 +1,9 @@
 #--- compute/variables.tf
 
+variable "account_id" {
+  description = "Account Id"
+  type        = string
+}
 variable "region" {
   description = "AWS region"
   type        = string

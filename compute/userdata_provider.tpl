@@ -24,12 +24,11 @@ chown -R ec2-user $logdir
 # shebang may contain space before command
 # ${bucket} is replaced by terraform, $datadir is ignored and replaced by bash at runtime
 # terraform gives an error if there are unknown variables in curly brackets
-echo "
-#! /bin/bash
+echo "#! /bin/bash
 set -euo pipefail
 echo \"Hello World! \" > \"$datadir/\$(date +\"%Y-%m-%d_%T.txt\")\"
 aws s3 cp --recursive $datadir/ s3://${bucket}/mydata/
-aws ssm send-command --region=$region --instance-ids ${consumer_id} --document-name \"AWS-RunShellScript\" --comment \"run shell script on ec2\" --parameters '{\"commands\":[\"# !/usr/bin/bash\",\"source /var/myscripts/copy-file.sh\"]}'
+aws ssm send-command --region=${region} --instance-ids ${consumer_id} --document-name \"AWS-RunShellScript\" --comment \"run shell script on ec2\" --parameters '{\"commands\":[\"# !/usr/bin/bash\",\"source /var/myscripts/copy-file.sh\"]}'
 rm -rf $datadir/*
 " >> $scriptdir/$scriptfile
 chmod +x $scriptdir/$scriptfile
