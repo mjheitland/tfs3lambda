@@ -38,6 +38,7 @@ module "storage" {
 module "networking" {
   source        = "./networking"
   
+  region        = var.region
   project_name  = var.project_name
 }
 

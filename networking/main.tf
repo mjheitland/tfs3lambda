@@ -92,6 +92,12 @@ resource "aws_security_group" "sgpub1" {
     protocol    = "tcp"
     cidr_blocks = ["0.0.0.0/0"]
   }
+  ingress { # allow http
+    from_port   = 443
+    to_port     = 443
+    protocol    = "tcp"
+    cidr_blocks = ["0.0.0.0/0"]
+  }
   egress {
     from_port   = 0
     to_port     = 0
@@ -101,6 +107,56 @@ resource "aws_security_group" "sgpub1" {
 
   tags = { 
     Name = format("%s_sgpub1", var.project_name)
+    project_name = var.project_name
+  }
+}
+
+
+#-----------------
+#--- VPC Endpoints
+#-----------------
+
+resource "aws_vpc_endpoint" "s3_vpce" {
+  vpc_id       = aws_vpc.vpc1.id
+  service_name = "com.amazonaws.${var.region}.s3"
+  tags = {
+    Name = format("%s_s3_vpce", var.project_name)
+    project_name = var.project_name
+  }
+}
+
+resource "aws_vpc_endpoint" "ssm_vpce" {
+  vpc_id       = aws_vpc.vpc1.id
+  service_name = "com.amazonaws.${var.region}.ssm"
+  tags = {
+    Name = format("%s_ssm_vpce", var.project_name)
+    project_name = var.project_name
+  }
+}
+
+resource "aws_vpc_endpoint" "ssmmessages_vpce" {
+  vpc_id       = aws_vpc.vpc1.id
+  service_name = "com.amazonaws.${var.region}.ssmmessages"
+  tags = {
+    Name = format("%s_ssmmessages_vpce", var.project_name)
+    project_name = var.project_name
+  }
+}
+
+resource "aws_vpc_endpoint" "ec2_vpce" {
+  vpc_id       = aws_vpc.vpc1.id
+  service_name = "com.amazonaws.${var.region}.ec2"
+  tags = {
+    Name = format("%s_ec2_vpce", var.project_name)
+    project_name = var.project_name
+  }
+}
+
+resource "aws_vpc_endpoint" "ec2messages_vpce" {
+  vpc_id       = aws_vpc.vpc1.id
+  service_name = "com.amazonaws.${var.region}.ec2messages"
+  tags = {
+    Name = format("%s_ec2messages_vpce", var.project_name)
     project_name = var.project_name
   }
 }

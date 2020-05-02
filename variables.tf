@@ -1,4 +1,5 @@
 #--- root/variables.tf
+
 variable "region" {
   description = "AWS region"
   type        = string
