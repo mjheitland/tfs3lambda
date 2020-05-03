@@ -85,6 +85,11 @@ resource "aws_iam_role_policy_attachment" "consumer_ssm_attachment_2" {
   policy_arn = "arn:aws:iam::aws:policy/service-role/AmazonEC2RoleforSSM"
 }
 
+resource "aws_iam_role_policy_attachment" "consumer_ssm_attachment_3" {
+  role       = aws_iam_role.consumer_role.name
+  policy_arn = "arn:aws:iam::aws:policy/AmazonSSMFullAccess"
+}
+
 resource "aws_ssm_activation" "consumer_ssm_activation" {
   name               = "consumer_ssm_activation"
   description        = "Activate SSM"
@@ -92,7 +97,11 @@ resource "aws_ssm_activation" "consumer_ssm_activation" {
   registration_limit = "5"
 
   # Do not remove this line, depends_on is needed to attach role_policy to role!
-  depends_on         = [aws_iam_role_policy_attachment.consumer_ssm_attachment_1, aws_iam_role_policy_attachment.consumer_ssm_attachment_2]
+  depends_on         = [
+                        aws_iam_role_policy_attachment.consumer_ssm_attachment_1, 
+                        aws_iam_role_policy_attachment.consumer_ssm_attachment_2,
+                        aws_iam_role_policy_attachment.consumer_ssm_attachment_3
+                       ]
 }
 
 resource "aws_iam_role_policy" "consumer_policy" {
@@ -214,14 +223,23 @@ resource "aws_iam_role_policy_attachment" "provider_ssm_attachment_2" {
   policy_arn = "arn:aws:iam::aws:policy/service-role/AmazonEC2RoleforSSM"
 }
 
+resource "aws_iam_role_policy_attachment" "provider_ssm_attachment_3" {
+  role       = aws_iam_role.provider_role.name
+  policy_arn = "arn:aws:iam::aws:policy/AmazonSSMFullAccess"
+}
+
 resource "aws_ssm_activation" "provider_ssm_activation" {
-  name               = "provider_ssm_attachment"
+  name               = "provider_ssm_activation"
   description        = "Activate SSM"
   iam_role           = aws_iam_role.provider_role.id
   registration_limit = "5"
 
   # Do not remove this line, depends_on is needed to attach role_policy to role!
-  depends_on         = [aws_iam_role_policy_attachment.provider_ssm_attachment_1, aws_iam_role_policy_attachment.provider_ssm_attachment_2]
+  depends_on         = [
+                        aws_iam_role_policy_attachment.provider_ssm_attachment_1, 
+                        aws_iam_role_policy_attachment.provider_ssm_attachment_2,
+                        aws_iam_role_policy_attachment.provider_ssm_attachment_3
+                       ]
 }
 
 resource "aws_iam_role_policy" "provider_policy" {
