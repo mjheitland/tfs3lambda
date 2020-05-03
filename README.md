@@ -8,7 +8,7 @@ The following components get created:
 + 1 key pair (run ssh-keygen in your home folder to create a key "~/.ssh/tfvpce/id_rsa.pub")
 + 1 VPC with one public subnet, internet gateway, route table and a security group
 + 2 ec2
-+ 1 Lambda to copy files from S3 to consumer (gets triggered by S3 events whenever the provider puts files into S3)
++ 1 Lambda to log files added to S3 (gets triggered by S3 events whenever the provider puts files into S3)
 
 ## Generate a keypair to access EC2 instances
 
