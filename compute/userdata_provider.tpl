@@ -64,5 +64,5 @@ chown -R ec2-user $datadir
 chown -R ec2-user $logdir
 
 # set alias for testing
-echo 'alias sm='"'"'aws ssm send-command --instance-ids "${consumer_id}" --document-name "AWS-RunShellScript" --comment "run shell script on ec2" --parameters '"'"'"'"'"'"'"'"'{"commands":["#!/usr/bin/bash","source /var/myscripts/copy-file.sh"]}'"'"'"'"'"'"'"'"' --region eu-west-1'"'"'' >> ~/.bashrc
-chown ec2-user ~/.bashrc
+echo 'alias sm='"'"'aws ssm send-command --instance-ids "${consumer_id}" --document-name "AWS-RunShellScript" --comment "run shell script on ec2" --parameters '"'"'"'"'"'"'"'"'{"commands":["#!/usr/bin/bash","source /var/myscripts/copy-file.sh"]}'"'"'"'"'"'"'"'"' --region eu-west-1'"'"'' >> /home/ec2-user/.bashrc
+chown ec2-user /home/ec2-user/.bashrc
