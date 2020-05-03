@@ -1,5 +1,8 @@
 # Copying files between two EC2 instances using S3 and Lambda (triggered by S3 events) with SSM
 
+Provider ec2 instance creates a file every minute (cron task), uploads it to S3 and 
+uses SSM to run a consumer script on the consumer ec2 to sync consumer's data directory with S3 bucket.
+
 The following components get created:
 + 1 S3 bucket
 + 1 key pair (run ssh-keygen in your home folder to create a key "~/.ssh/tfvpce/id_rsa.pub")
