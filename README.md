@@ -46,4 +46,4 @@ Example 3 - run a Python script on the instance:
 sh_command_id=$(aws ssm send-command --instance-ids "<ec2 instance id>" --document-name "AWS-RunShellScript" --comment "Demo run shell script on Linux Instances" --parameters '{"commands":["#!/usr/bin/python","print \"Hello world from python\""]}' --output text --query "Command.CommandId" --region eu-west-1) sh -c 'aws ssm list-command-invocations --command-id "$sh_command_id" --details --query "CommandInvocations[].CommandPlugins[].{Status:Status,Output:Output}"'
 
 Example 4 - run a Bash script on the instance:
-aws ssm send-command --region eu-west-1 --instance-ids "<ec2 instance id>" --document-name "AWS-RunShellScript" --comment "run shell script on ec2" --parameters '{"commands":["#!/usr/bin/bash","source /var/myscripts/copy-file.sh"]}'
+aws ssm send-command --region eu-west-1 --instance-ids "$ec2_instance_id" --document-name "AWS-RunShellScript" --comment "run shell script on ec2" --parameters '{"commands":["#!/usr/bin/bash","source /var/myscripts/consumer-script.sh"]}'
