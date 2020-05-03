@@ -90,6 +90,8 @@ resource "aws_ssm_activation" "consumer_ssm_activation" {
   description        = "Activate SSM"
   iam_role           = aws_iam_role.consumer_role.id
   registration_limit = "5"
+
+  # Do not remove this line, depends_on is needed to attach role_policy to role!
   depends_on         = [aws_iam_role_policy_attachment.consumer_ssm_attachment_1, aws_iam_role_policy_attachment.consumer_ssm_attachment_2]
 }
 
@@ -168,6 +170,8 @@ data "template_file" "userdata_provider" {
     bucket = var.bucket
     consumer_id = (aws_instance.consumer.*.id)[0]
   }
+
+  # Do not remove this line, depends_on is needed to attach role_policy to role!
   depends_on = [aws_lambda_permission.s3_invoke_lambda_permission, aws_instance.consumer]
 }
 
@@ -215,6 +219,8 @@ resource "aws_ssm_activation" "provider_ssm_activation" {
   description        = "Activate SSM"
   iam_role           = aws_iam_role.provider_role.id
   registration_limit = "5"
+
+  # Do not remove this line, depends_on is needed to attach role_policy to role!
   depends_on         = [aws_iam_role_policy_attachment.provider_ssm_attachment_1, aws_iam_role_policy_attachment.provider_ssm_attachment_2]
 }
 
@@ -283,5 +289,6 @@ resource "aws_instance" "provider" {
     project_name = var.project_name
   }
 
+  # Do not remove this line, Provider needs instance id of consumer!
   depends_on = [aws_instance.consumer]
 }
