@@ -214,7 +214,6 @@ resource "aws_ssm_activation" "provider_ssm_activation" {
   description        = "Activate SSM"
   iam_role           = aws_iam_role.provider_role.id
   registration_limit = "5"
-  depends_on         = [aws_iam_role_policy_attachment.provider_ssm_attachment]
 }
 
 resource "aws_iam_role_policy" "provider_policy" {
