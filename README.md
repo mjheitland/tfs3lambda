@@ -34,13 +34,13 @@ The following components get created:
 <a href="https://docs.aws.amazon.com/systems-manager/latest/userguide/walkthrough-cli.html#walkthrough-cli-examples">SSM Run Command</a>
 
 Example 1 - ipconfig:
-aws ssm send-command --instance-ids "<ec2 instance id>" --document-name "AWS-RunShellScript" --comment "IP config" --parameters commands=ifconfig --output text --region eu-west-1
+aws ssm send-command --region eu-west-1 --instance-ids "<ec2 instance id>" --document-name "AWS-RunShellScript" --comment "IP config" --parameters commands=ifconfig --output text
 
 Example 2 - get instance details:
-aws ssm describe-instance-information --instance-information-filter-list key=InstanceIds,valueSet=<ec2 instance id> --region eu-west-1
+aws ssm describe-instance-information --region eu-west-1 --instance-information-filter-list key=InstanceIds,valueSet=<ec2 instance id> --region eu-west-1
 
 Example 3 - run a Python script on the instance:
 sh_command_id=$(aws ssm send-command --instance-ids "<ec2 instance id>" --document-name "AWS-RunShellScript" --comment "Demo run shell script on Linux Instances" --parameters '{"commands":["#!/usr/bin/python","print \"Hello world from python\""]}' --output text --query "Command.CommandId" --region eu-west-1) sh -c 'aws ssm list-command-invocations --command-id "$sh_command_id" --details --query "CommandInvocations[].CommandPlugins[].{Status:Status,Output:Output}"'
 
 Example 4 - run a Bash script on the instance:
-aws ssm send-command --instance-ids "<ec2 instance id>" --document-name "AWS-RunShellScript" --comment "run shell script on ec2" --parameters '{"commands":["#!/usr/bin/bash","source /var/myscripts/copy-file.sh"]}' --region eu-west-1
+aws ssm send-command --region eu-west-1 --instance-ids "<ec2 instance id>" --document-name "AWS-RunShellScript" --comment "run shell script on ec2" --parameters '{"commands":["#!/usr/bin/bash","source /var/myscripts/copy-file.sh"]}'

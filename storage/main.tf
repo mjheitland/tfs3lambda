@@ -70,7 +70,7 @@ resource "aws_s3_bucket" "private_bucket" {
   }
 
   lifecycle_rule {
-    enabled = true
+    enabled = var.enable_lifecycle
 
     prefix = "_AWSBucketInventory/"
 
