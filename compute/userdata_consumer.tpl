@@ -36,6 +36,7 @@ chmod +x $scriptdir/$scriptfile
 # for Python 3: sudo nohup python -m http.server 80 &
 echo "Region: ${region}" >> $logdir/$logfile
 echo "Server name: ${server_name}" >> $logdir/$logfile
+echo "whoami: `whoami`" >> $logdir/$logfile
 aws --version >> $logdir/$logfile
 yum info amazon-ssm-agent >> $logdir/$logfile
 echo "Starting SimpleHTTPServer ..." >> $logdir/$logfile

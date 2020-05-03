@@ -19,17 +19,15 @@ logfile=log.txt
 mkdir -p $logdir
 
 # shell command to generate a new file and upload it to S3 folder
-# space needed after ! to prevent bash history substitution
-# shebang may contain space before command
-# ${bucket} is replaced by terraform, $datadir is ignored and replaced by bash at runtime
-# terraform gives an error if there are unknown variables in curly brackets
-echo "#! /bin/bash
+echo '#!/bin/bash
 set -euo pipefail
-echo \"Hello World! \" > \"$datadir/\$(date +\"%Y-%m-%d_%T.txt\")\"
-aws s3 cp --recursive $datadir/ s3://${bucket}/mydata/
-aws ssm send-command --region=${region} --instance-ids ${consumer_id} --document-name \"AWS-RunShellScript\" --comment \"run shell script on ec2\" --parameters '{\"commands\":[\"# !/usr/bin/bash\",\"source /var/myscripts/consumer_script.sh\"]}'
-rm -rf $datadir/*
-" >> $scriptdir/$providerscript
+filename="/var/mydata/$(date +"%Y-%m-%d_%T.txt")"
+echo "`whoami`: Hello World!" > "$filename"
+chown ec2-user "$filename"
+aws s3 cp --recursive /var/mydata/ s3://${bucket}/mydata/
+aws ssm send-command --region=${region} --instance-ids ${consumer_id} --document-name "AWS-RunShellScript" --comment "run shell script on ec2" --parameters '"'"'{"commands":["#!/usr/bin/bash","source /var/myscripts/consumer_script.sh"]}'"'"'
+rm -rf /var/mydata/*
+' > $scriptdir/$providerscript
 chmod +x $scriptdir/$providerscript
 
 # shell command to sync ec2's data directory with S3 directory (S3 => local folder on ec2)
@@ -40,7 +38,7 @@ chmod +x $scriptdir/$providerscript
 echo "#! /bin/bash
 set -euo pipefail
 aws s3 sync --delete s3://${bucket}/mydata/ $datadir/
-" >> $scriptdir/$consumerscript
+" > $scriptdir/$consumerscript
 chmod +x $scriptdir/$consumerscript
 
 # add cron task to generate a new file, runs every minute under 'ec2-user' account
@@ -52,6 +50,7 @@ echo "*/1 * * * * /var/myscripts/provider_script.sh" >> $cronpath
 echo "Region: ${region}" >> $logdir/$logfile
 echo "Consumer id:  ${consumer_id}" >> $logdir/$logfile
 echo "Server name: ${server_name}" >> $logdir/$logfile
+echo "whoami: `whoami`" >> $logdir/$logfile
 aws --version >> $logdir/$logfile
 yum info amazon-ssm-agent >> $logdir/$logfile
 echo "Starting SimpleHTTPServer ..." >> $logdir/$logfile
