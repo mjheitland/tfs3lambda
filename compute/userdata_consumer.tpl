@@ -38,7 +38,7 @@ echo "whoami: $(whoami)" >> $logdir/$logfile
 aws --version >> $logdir/$logfile
 yum info amazon-ssm-agent >> $logdir/$logfile
 echo "Starting SimpleHTTPServer ..." >> $logdir/$logfile
-cd /var
+cd $datadir
 nohup python -m SimpleHTTPServer 80 &
 echo "... SimpleHTTPServer is running" >> $logdir/$logfile
 
