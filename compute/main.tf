@@ -56,15 +56,15 @@ resource "aws_iam_role" "consumer_role" {
   "Statement": [
     {
       "Sid": "consumerAssumeEC2RolePolicy",
-      "Action": "sts:AssumeRole",
       "Effect": "Allow",
+      "Action": "sts:AssumeRole",
       "Principal": { "Service": "ec2.amazonaws.com" }
     },
     {
       "Sid": "consumerAssumeSSMRolePolicy",
-      "Action": "sts:AssumeRole",
       "Effect": "Allow",
-      "Principal": {"Service": "ssm.amazonaws.com"}
+      "Action": "sts:AssumeRole",
+      "Principal": { "Service": "ssm.amazonaws.com" }
     } 
   ]
 }
@@ -75,75 +75,79 @@ EOF
   }
 }
 
-resource "aws_iam_role_policy_attachment" "consumer_ssm_attachment_1" {
-  role       = aws_iam_role.consumer_role.name
-  policy_arn = "arn:aws:iam::aws:policy/AmazonSSMManagedInstanceCore"
-}
-
-resource "aws_iam_role_policy_attachment" "consumer_ssm_attachment_2" {
-  role       = aws_iam_role.consumer_role.name
-  policy_arn = "arn:aws:iam::aws:policy/service-role/AmazonEC2RoleforSSM"
-}
-
-resource "aws_iam_role_policy_attachment" "consumer_ssm_attachment_3" {
-  role       = aws_iam_role.consumer_role.name
-  policy_arn = "arn:aws:iam::aws:policy/AmazonSSMFullAccess"
-}
-
-resource "aws_ssm_activation" "consumer_ssm_activation" {
-  name               = "consumer_ssm_activation"
-  description        = "Activate SSM"
-  iam_role           = aws_iam_role.consumer_role.id
-  registration_limit = "5"
-
-  # Do not remove this line, depends_on is needed to attach role_policy to role!
-  depends_on         = [
-                        aws_iam_role_policy_attachment.consumer_ssm_attachment_1, 
-                        aws_iam_role_policy_attachment.consumer_ssm_attachment_2,
-                        aws_iam_role_policy_attachment.consumer_ssm_attachment_3
-                       ]
-}
-
 resource "aws_iam_role_policy" "consumer_policy" {
   name = "consumer_policy"
   role = aws_iam_role.consumer_role.id
 
   policy = <<EOF
 {
-  "Version": "2012-10-17",
-  "Statement":[ 
-    { 
-      "Sid": "consumerS3FullAccessPolicy",
-      "Action":[ 
-        "s3:ListBucket",
-        "s3:GetBucketLocation"
-      ],
-      "Effect":"Allow",
-      "Resource":"arn:aws:s3:::${var.bucket}"
-    },
-    { 
-      "Action":[ 
-        "s3:GetObject",
-        "s3:GetObjectAcl"
-      ],
-      "Effect":"Allow",
-      "Resource":"arn:aws:s3:::${var.bucket}/*"
-    },
-    {
-            "Sid": "SSMRead",
-            "Effect": "Allow",
-            "Action": [
-                "ssm:*",
-                "ssm:GetAutomationExecution",
-                "ssm:GetParameters",
-                "ssm:ListCommands",
-                "ssm:StartAutomationExecution"
-            ],
-            "Resource": [
-                "*"
-            ]
-        }
-  ]}
+   "Version":"2012-10-17",
+   "Statement":[
+      {
+         "Sid":"consumerS3ListBucketPolicy",
+         "Effect":"Allow",
+         "Action":[
+            "s3:ListBucket",
+            "s3:GetBucketLocation"
+         ],
+         "Resource":"arn:aws:s3:::${var.bucket}"
+      },
+      {
+         "Sid":"consumerS3ReadPolicy",
+         "Effect":"Allow",
+         "Action":[
+            "s3:GetObject",
+            "s3:GetObjectAcl"
+         ],
+         "Resource":"arn:aws:s3:::${var.bucket}/*"
+      },
+      {
+         "Sid":"consumerSSMPolicy",
+         "Effect":"Allow",
+         "Action":[
+            "cloudwatch:PutMetricData",
+            "ds:CreateComputer",
+            "ds:DescribeDirectories",
+            "ec2:DescribeInstanceStatus",
+            "logs:*",
+            "ssm:*",
+            "ec2messages:*"
+         ],
+         "Resource":"*"
+      },
+      {
+         "Sid":"consumerCreateServiceLinkedRolePolicy",
+         "Effect":"Allow",
+         "Action":"iam:CreateServiceLinkedRole",
+         "Resource":"arn:aws:iam::*:role/aws-service-role/ssm.amazonaws.com/AWSServiceRoleForAmazonSSM*",
+         "Condition":{
+            "StringLike":{
+               "iam:AWSServiceName":"ssm.amazonaws.com"
+            }
+         }
+      },
+      {
+         "Sid":"consumerDeleteServiceLinkedRolePolicy",
+         "Effect":"Allow",
+         "Action":[
+            "iam:DeleteServiceLinkedRole",
+            "iam:GetServiceLinkedRoleDeletionStatus"
+         ],
+         "Resource":"arn:aws:iam::*:role/aws-service-role/ssm.amazonaws.com/AWSServiceRoleForAmazonSSM*"
+      },
+      {
+         "Sid":"consumerSSMMessagesPolicy",
+         "Effect":"Allow",
+         "Action":[
+            "ssmmessages:CreateControlChannel",
+            "ssmmessages:CreateDataChannel",
+            "ssmmessages:OpenControlChannel",
+            "ssmmessages:OpenDataChannel"
+         ],
+         "Resource":"*"
+      }
+   ]
+}
 EOF
 }
 
@@ -191,18 +195,16 @@ resource "aws_iam_role" "provider_role" {
   "Version": "2012-10-17",
   "Statement": [
     {
-      "Sid": "ProviderAssumeEC2RolePolicy",
-      "Principal": {
-        "Service": "ec2.amazonaws.com"
-      },
+      "Sid": "providerAssumeEC2RolePolicy",
+      "Effect": "Allow",
       "Action": "sts:AssumeRole",
-      "Effect": "Allow"
+      "Principal": { "Service": "ec2.amazonaws.com" }
     },
     {
       "Sid": "providerAssumeSSMRolePolicy",
-      "Action": "sts:AssumeRole",
       "Effect": "Allow",
-      "Principal": {"Service": "ssm.amazonaws.com"}
+      "Action": "sts:AssumeRole",
+      "Principal": { "Service": "ssm.amazonaws.com" }
     }
   ]
 }
@@ -213,81 +215,93 @@ EOF
   }
 }
 
-resource "aws_iam_role_policy_attachment" "provider_ssm_attachment_1" {
-  role       = aws_iam_role.provider_role.name
-  policy_arn = "arn:aws:iam::aws:policy/AmazonSSMManagedInstanceCore"
-}
-
-resource "aws_iam_role_policy_attachment" "provider_ssm_attachment_2" {
-  role       = aws_iam_role.provider_role.name
-  policy_arn = "arn:aws:iam::aws:policy/service-role/AmazonEC2RoleforSSM"
-}
-
-resource "aws_iam_role_policy_attachment" "provider_ssm_attachment_3" {
-  role       = aws_iam_role.provider_role.name
-  policy_arn = "arn:aws:iam::aws:policy/AmazonSSMFullAccess"
-}
-
-resource "aws_ssm_activation" "provider_ssm_activation" {
-  name               = "provider_ssm_activation"
-  description        = "Activate SSM"
-  iam_role           = aws_iam_role.provider_role.id
-  registration_limit = "5"
-
-  # Do not remove this line, depends_on is needed to attach role_policy to role!
-  depends_on         = [
-                        aws_iam_role_policy_attachment.provider_ssm_attachment_1, 
-                        aws_iam_role_policy_attachment.provider_ssm_attachment_2,
-                        aws_iam_role_policy_attachment.provider_ssm_attachment_3
-                       ]
-}
-
 resource "aws_iam_role_policy" "provider_policy" {
   name = "provider_policy"
   role = aws_iam_role.provider_role.id
 
   policy = <<EOF
 {
-  "Version": "2012-10-17",
-  "Statement":[ 
-    { 
-      "Sid": "ProviderS3FullAccessPolicy",
-      "Action":[ 
-        "s3:ListBucket",
-        "s3:GetBucketLocation"
-      ],
-      "Effect":"Allow",
-      "Resource":"arn:aws:s3:::${var.bucket}"
-    },
-    { 
-      "Action":[ 
-        "s3:GetObject",
-        "s3:GetObjectAcl",
-        "s3:PutObject",
-        "s3:PutObjectAcl",
-        "s3:DeleteObject"
-      ],
-      "Effect":"Allow",
-      "Resource":"arn:aws:s3:::${var.bucket}/*"
-    },
-    {
-        "Sid": "SSMWrite",
-        "Effect": "Allow",
-        "Action": [ 
+   "Version":"2012-10-17",
+   "Statement":[
+      {
+         "Sid":"ProviderS3ListBucketPolicy",
+         "Action":[
+            "s3:ListBucket",
+            "s3:GetBucketLocation"
+         ],
+         "Effect":"Allow",
+         "Resource":"arn:aws:s3:::${var.bucket}"
+      },
+      {
+         "Sid":"ProviderS3ReadAndWritePolicy",
+         "Effect":"Allow",
+         "Action":[
+            "s3:GetObject",
+            "s3:GetObjectAcl",
+            "s3:PutObject",
+            "s3:PutObjectAcl",
+            "s3:DeleteObject"
+         ],
+         "Resource":"arn:aws:s3:::${var.bucket}/*"
+      },
+      {
+         "Sid":"providerSSMPolicy",
+         "Effect":"Allow",
+         "Action":[
+            "cloudwatch:PutMetricData",
+            "ds:CreateComputer",
+            "ds:DescribeDirectories",
+            "ec2:DescribeInstanceStatus",
+            "logs:*",
             "ssm:*",
-            "ssm:SendCommand"
-        ],
-        "Resource": [
-            "arn:aws:s3:::${var.bucket}",
-            "arn:aws:ec2:${var.region}:${var.account_id}:instance/${aws_instance.consumer.*.id[0]}",
-            "arn:aws:ssm:${var.region}:${var.account_id}:document/AWS-ApplyPatchBaseline",
-            "arn:aws:ssm:${var.region}:${var.account_id}:document/AWS-RunShellScript",            
-            "arn:aws:ssm:${var.region}:${var.account_id}:document/RestartServices"            
-        ]
-    }
-  ]}
+            "ec2messages:*"
+         ],
+         "Resource":"*"
+      },
+      {
+         "Sid":"providerCreateServiceLinkedRolePolicy",
+         "Effect":"Allow",
+         "Action":"iam:CreateServiceLinkedRole",
+         "Resource":"arn:aws:iam::*:role/aws-service-role/ssm.amazonaws.com/AWSServiceRoleForAmazonSSM*",
+         "Condition":{
+            "StringLike":{
+               "iam:AWSServiceName":"ssm.amazonaws.com"
+            }
+         }
+      },
+      {
+         "Sid":"providerDeleteServiceLinkedRolePolicy",
+         "Effect":"Allow",
+         "Action":[
+            "iam:DeleteServiceLinkedRole",
+            "iam:GetServiceLinkedRoleDeletionStatus"
+         ],
+         "Resource":"arn:aws:iam::*:role/aws-service-role/ssm.amazonaws.com/AWSServiceRoleForAmazonSSM*"
+      },
+      {
+         "Sid":"providerSSMMessagesPolicy",
+         "Effect":"Allow",
+         "Action":[
+            "ssmmessages:CreateControlChannel",
+            "ssmmessages:CreateDataChannel",
+            "ssmmessages:OpenControlChannel",
+            "ssmmessages:OpenDataChannel"
+         ],
+         "Resource":"*"
+      }
+   ]
+}
 EOF
 }
+
+#        "Resource": [
+#            "arn:aws:s3:::${var.bucket}",
+#            "arn:aws:ec2:${var.region}:${var.account_id}:instance/${aws_instance.consumer.*.id[0]}",
+#            "arn:aws:ssm:${var.region}:${var.account_id}:document/AWS-ApplyPatchBaseline",
+#            "arn:aws:ssm:${var.region}:${var.account_id}:document/AWS-RunShellScript",            
+#            "arn:aws:ssm:${var.region}:${var.account_id}:document/RestartServices"            
+#        ]
+#
 
 resource "aws_iam_instance_profile" "provider_profile" {
   name = "provider_profile"
