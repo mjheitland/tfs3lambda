@@ -128,8 +128,7 @@ resource "aws_iam_role_policy" "consumer_policy" {
             "ssm:ListCommands",
             "ssm:ListCommandInvocations",
             "ssm:ListDocuments",
-            "ssm:ListDocumentVersions",
-            "ssm:*"
+            "ssm:ListDocumentVersions"
          ],
          "Resource":"*"
       },
@@ -137,7 +136,7 @@ resource "aws_iam_role_policy" "consumer_policy" {
       {
          "Sid":"consumerSSMSendCommandPolicy",
          "Effect":"Allow",
-         "Action":"ssm:SendCommand",
+         "Action":"ssm:*",
          "Resource":[
             "arn:aws:ec2:${var.region}:${var.account_id}:instance/*",
             "arn:aws:ssm:${var.region}:${var.account_id}:document/*"
@@ -268,8 +267,7 @@ resource "aws_iam_role_policy" "provider_policy" {
             "ssm:ListCommands",
             "ssm:ListCommandInvocations",
             "ssm:ListDocuments",
-            "ssm:ListDocumentVersions",
-            "ssm:*"
+            "ssm:ListDocumentVersions"
          ],
          "Resource":"*"
       },
@@ -277,7 +275,7 @@ resource "aws_iam_role_policy" "provider_policy" {
       {
          "Sid":"providerSSMSendCommandPolicy",
          "Effect":"Allow",
-         "Action":"ssm:SendCommand",
+         "Action":"ssm:*",
          "Resource":[
             "arn:aws:ec2:${var.region}:${var.account_id}:instance/*",
             "arn:aws:ssm:${var.region}:${var.account_id}:document/*"
