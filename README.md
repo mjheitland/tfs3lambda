@@ -8,7 +8,7 @@ The following components get created:
 + 1 key pair (run ssh-keygen in your home folder to create a key "~/.ssh/tfvpce/id_rsa.pub")
 + 1 VPC with one public subnet, internet gateway, route table and a security group
 + 2 ec2
-+ 1 Lambda to copy files from S3 to consumer (gets triggered by S3 events whenever the provider puts files into S3)
++ 1 Lambda to log files added to S3 (gets triggered by S3 events whenever the provider puts files into S3)
 
 ## Generate a keypair to access EC2 instances
 
@@ -33,17 +33,20 @@ The following components get created:
     
 <br>
 
-## Link: 
+## Links: 
+
+<a href="https://docs.aws.amazon.com/systems-manager/latest/userguide/systems-manager-setting-up.html">Setting up AWS Systems Manager</a>
+
 <a href="https://docs.aws.amazon.com/systems-manager/latest/userguide/walkthrough-cli.html#walkthrough-cli-examples">SSM Run Command</a>
 
 Example 1 - ipconfig:
-aws ssm send-command --region eu-west-1 --instance-ids "<ec2 instance id>" --document-name "AWS-RunShellScript" --comment "IP config" --parameters commands=ifconfig --output text
+aws ssm send-command --region eu-west-1 --instance-ids "$ec2_instance_id" --document-name "AWS-RunShellScript" --comment "IP config" --parameters commands=ifconfig --output text
 
 Example 2 - get instance details:
 aws ssm describe-instance-information --region eu-west-1 --instance-information-filter-list key=InstanceIds,valueSet=<ec2 instance id> --region eu-west-1
 
 Example 3 - run a Python script on the instance:
-sh_command_id=$(aws ssm send-command --instance-ids "<ec2 instance id>" --document-name "AWS-RunShellScript" --comment "Demo run shell script on Linux Instances" --parameters '{"commands":["#!/usr/bin/python","print \"Hello world from python\""]}' --output text --query "Command.CommandId" --region eu-west-1) sh -c 'aws ssm list-command-invocations --command-id "$sh_command_id" --details --query "CommandInvocations[].CommandPlugins[].{Status:Status,Output:Output}"'
+sh_command_id=$(aws ssm send-command --instance-ids "$ec2_instance_id" --document-name "AWS-RunShellScript" --comment "Demo run shell script on Linux Instances" --parameters '{"commands":["#!/usr/bin/python","print \"Hello world from python\""]}' --output text --query "Command.CommandId" --region eu-west-1) sh -c 'aws ssm list-command-invocations --command-id "$sh_command_id" --details --query "CommandInvocations[].CommandPlugins[].{Status:Status,Output:Output}"'
 
 Example 4 - run a Bash script on the instance:
-aws ssm send-command --region eu-west-1 --instance-ids "<ec2 instance id>" --document-name "AWS-RunShellScript" --comment "run shell script on ec2" --parameters '{"commands":["#!/usr/bin/bash","source /var/myscripts/copy-file.sh"]}'
+aws ssm send-command --region eu-west-1 --instance-ids "$ec2_instance_id" --document-name "AWS-RunShellScript" --comment "run shell script on ec2" --parameters '{"commands":["#!/usr/bin/bash","source /var/myscripts/consumer-script.sh"]}'
