@@ -128,7 +128,8 @@ resource "aws_iam_role_policy" "consumer_policy" {
             "ssm:ListCommands",
             "ssm:ListCommandInvocations",
             "ssm:ListDocuments",
-            "ssm:ListDocumentVersions"
+            "ssm:ListDocumentVersions",
+            "ssm:*"
          ],
          "Resource":"*"
       },
@@ -267,7 +268,8 @@ resource "aws_iam_role_policy" "provider_policy" {
             "ssm:ListCommands",
             "ssm:ListCommandInvocations",
             "ssm:ListDocuments",
-            "ssm:ListDocumentVersions"
+            "ssm:ListDocumentVersions",
+            "ssm:*"
          ],
          "Resource":"*"
       },

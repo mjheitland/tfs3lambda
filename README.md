@@ -39,6 +39,8 @@ The following components get created:
 
 <a href="https://docs.aws.amazon.com/systems-manager/latest/userguide/walkthrough-cli.html#walkthrough-cli-examples">SSM Run Command</a>
 
+<a href="https://docs.aws.amazon.com/systems-manager/latest/userguide/security_iam_id-based-policy-examples.html">AWS Systems Manager identity-based policy examples</a>
+
 Example 1 - ipconfig:
 aws ssm send-command --region eu-west-1 --instance-ids "$ec2_instance_id" --document-name "AWS-RunShellScript" --comment "IP config" --parameters commands=ifconfig --output text
 
