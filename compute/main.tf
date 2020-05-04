@@ -116,6 +116,17 @@ resource "aws_iam_role_policy" "consumer_policy" {
          "Resource":"*"
       },
       {
+         "Sid":"consumerSSMMessagesPolicy",
+         "Effect":"Allow",
+         "Action":[
+            "ssmmessages:CreateControlChannel",
+            "ssmmessages:CreateDataChannel",
+            "ssmmessages:OpenControlChannel",
+            "ssmmessages:OpenDataChannel"
+         ],
+         "Resource":"*"
+      },
+      {
          "Sid":"consumerCreateServiceLinkedRolePolicy",
          "Effect":"Allow",
          "Action":"iam:CreateServiceLinkedRole",
@@ -134,17 +145,6 @@ resource "aws_iam_role_policy" "consumer_policy" {
             "iam:GetServiceLinkedRoleDeletionStatus"
          ],
          "Resource":"arn:aws:iam::*:role/aws-service-role/ssm.amazonaws.com/AWSServiceRoleForAmazonSSM*"
-      },
-      {
-         "Sid":"consumerSSMMessagesPolicy",
-         "Effect":"Allow",
-         "Action":[
-            "ssmmessages:CreateControlChannel",
-            "ssmmessages:CreateDataChannel",
-            "ssmmessages:OpenControlChannel",
-            "ssmmessages:OpenDataChannel"
-         ],
-         "Resource":"*"
       }
    ]
 }
@@ -259,6 +259,17 @@ resource "aws_iam_role_policy" "provider_policy" {
          "Resource":"*"
       },
       {
+         "Sid":"providerSSMMessagesPolicy",
+         "Effect":"Allow",
+         "Action":[
+            "ssmmessages:CreateControlChannel",
+            "ssmmessages:CreateDataChannel",
+            "ssmmessages:OpenControlChannel",
+            "ssmmessages:OpenDataChannel"
+         ],
+         "Resource":"*"
+      },
+      {
          "Sid":"providerCreateServiceLinkedRolePolicy",
          "Effect":"Allow",
          "Action":"iam:CreateServiceLinkedRole",
@@ -277,17 +288,6 @@ resource "aws_iam_role_policy" "provider_policy" {
             "iam:GetServiceLinkedRoleDeletionStatus"
          ],
          "Resource":"arn:aws:iam::*:role/aws-service-role/ssm.amazonaws.com/AWSServiceRoleForAmazonSSM*"
-      },
-      {
-         "Sid":"providerSSMMessagesPolicy",
-         "Effect":"Allow",
-         "Action":[
-            "ssmmessages:CreateControlChannel",
-            "ssmmessages:CreateDataChannel",
-            "ssmmessages:OpenControlChannel",
-            "ssmmessages:OpenDataChannel"
-         ],
-         "Resource":"*"
       }
    ]
 }
@@ -295,45 +295,11 @@ EOF
 }
 
 #        "Resource": [
-# arn:aws:s3:::patch-baseline-snapshot-region/*
-# arn:aws:s3:::aws-ssm-region/*
-#            "arn:aws:s3:::${var.bucket}",
 #            "arn:aws:ec2:${var.region}:${var.account_id}:instance/${aws_instance.consumer.*.id[0]}",
 #            "arn:aws:ssm:${var.region}:${var.account_id}:document/AWS-ApplyPatchBaseline",
 #            "arn:aws:ssm:${var.region}:${var.account_id}:document/AWS-RunShellScript",            
 #            "arn:aws:ssm:${var.region}:${var.account_id}:document/RestartServices"            
 #        ]
-#
-# {
-#     "Version": "2012-10-17",
-#     "Statement": [
-#         {
-#             "Effect": "Allow",
-#             "Action": "s3:GetObject",
-#             "Resource": [
-#                 "arn:aws:s3:::aws-ssm-region/*",
-#                 "arn:aws:s3:::aws-windows-downloads-region/*",
-#                 "arn:aws:s3:::amazon-ssm-region/*",
-#                 "arn:aws:s3:::amazon-ssm-packages-region/*",
-#                 "arn:aws:s3:::region-birdwatcher-prod/*",
-#                 "arn:aws:s3:::patch-baseline-snapshot-region/*"
-#             ]
-#         },
-#         {
-#             "Effect": "Allow",
-#             "Action": [
-#                 "s3:GetObject",
-#                 "s3:PutObject",
-#                 "s3:PutObjectAcl", 
-#                 "s3:GetEncryptionConfiguration" 
-#             ],
-#             "Resource": [
-#                 "arn:aws:s3:::my-bucket-name/*",
-#                 "arn:aws:s3:::my-bucket-name" 
-#             ]
-#         }
-#     ]
-# }
 
 resource "aws_iam_instance_profile" "provider_profile" {
   name = "provider_profile"
