@@ -41,6 +41,7 @@ echo "$(whoami): Hello World!" > "$filename"
 chown ec2-user "$filename"
 aws s3 cp --recursive /var/mydata/ s3://${bucket}/mydata/
 aws ssm send-command --region=${region} --instance-ids "${consumer_id}" --document-name "AWS-RunShellScript" --comment "run shell script on ec2" --parameters '"'"'{"commands":["#!/usr/bin/bash","source /var/myscripts/consumer_script.sh"]}'"'"'
+echo "file $filename uploaded to S3" >> '"$logdir/$logfile"'
 rm -rf /var/mydata/*
 ' > $scriptdir/$providerscript
 chmod +x $scriptdir/$providerscript
@@ -71,5 +72,37 @@ chown -R ec2-user $logdir
 # We see this crazy single/double quote nightmare
 # because we have to encode single quotes within
 # single quotes within single quotes
-echo 'alias sm='"'"'aws ssm send-command --region eu-west-1 --instance-ids "${consumer_id}" --document-name "AWS-RunShellScript" --comment "run shell script on ec2" --parameters '"'"'"'"'"'"'"'"'{"commands":["#!/usr/bin/bash","source /var/myscripts/consumer_script.sh"]}'"'"'"'"'"'"'"'"''"'"'' >> /home/ec2-user/.bashrc
+echo 'alias sm='"'"'aws ssm send-command --region ${region} --instance-ids "${consumer_id}" --document-name "AWS-RunShellScript" --comment "run shell script on ec2" --parameters '"'"'"'"'"'"'"'"'{"commands":["#!/usr/bin/bash","source /var/myscripts/consumer_script.sh"]}'"'"'"'"'"'"'"'"''"'"'' >> /home/ec2-user/.bashrc
 chown ec2-user /home/ec2-user/.bashrc
+
+# New way to install AWS Cloudwatch agent on Amazon Linux 2:
+# The agent installation log is at /var/log/awslogs-agent-setup.log and the agent log is at /var/log/awslogs.log.
+# https://docs.aws.amazon.com/AmazonCloudWatch/latest/logs/QuickStartEC2Instance.html 
+sudo yum update -y
+sudo yum install -y awslogs
+
+# Install Cloudwatch agent to copy all entries from local log file to Cloudwatch
+# https://docs.aws.amazon.com/AmazonCloudWatch/latest/logs/AgentReference.html
+# edit /etc/awslogs/awslogs.conf
+echo '
+[/var/mylogs/log.txt]
+datetime_format = %b %d %H:%M:%S
+file = /var/mylogs/log.txt
+buffer_duration = 5000
+log_stream_name = log.txt
+initial_position = start_of_file
+log_group_name = {instance_id}/var/mylogs' >> /etc/awslogs/awslogs.conf
+
+# By default, the /etc/awslogs/awscli.conf points to the us-east-1 region. 
+# To push your logs to a different region, edit the awscli.conf file and specify that region.
+sed -e 's/us-east-1/${region}/' -i /etc/awslogs/awscli.conf
+
+# Start Cloudwatch agent
+sudo systemctl start awslogsd
+# After starting the log demon, check the /var/log/awslogs.log file for errors logged when starting the service.
+
+# For Amazon Linux 2 run this command to start Cloudwatch agent on every reboot
+sudo systemctl enable awslogsd.service
+
+# Stop Cloudwatch agent
+#sudo systemctl stop awslogsd
