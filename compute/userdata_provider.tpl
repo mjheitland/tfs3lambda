@@ -75,13 +75,15 @@ chown -R ec2-user $logdir
 echo 'alias sm='"'"'aws ssm send-command --region ${region} --instance-ids "${consumer_id}" --document-name "AWS-RunShellScript" --comment "run shell script on ec2" --parameters '"'"'"'"'"'"'"'"'{"commands":["#!/usr/bin/bash","source /var/myscripts/consumer_script.sh"]}'"'"'"'"'"'"'"'"''"'"'' >> /home/ec2-user/.bashrc
 chown ec2-user /home/ec2-user/.bashrc
 
+
+
+# Install Cloudwatch agent to copy all entries from local log file to Cloudwatch
 # New way to install AWS Cloudwatch agent on Amazon Linux 2:
 # The agent installation log is at /var/log/awslogs-agent-setup.log and the agent log is at /var/log/awslogs.log.
 # https://docs.aws.amazon.com/AmazonCloudWatch/latest/logs/QuickStartEC2Instance.html 
 sudo yum update -y
 sudo yum install -y awslogs
 
-# Install Cloudwatch agent to copy all entries from local log file to Cloudwatch
 # https://docs.aws.amazon.com/AmazonCloudWatch/latest/logs/AgentReference.html
 # edit /etc/awslogs/awslogs.conf
 echo '
